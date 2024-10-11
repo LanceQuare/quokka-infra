@@ -1,0 +1,25 @@
+- name: Setup DHCP Server
+  hosts: dhcp_server
+  become: yes
+  tasks:
+    - name: Install DHCP server
+      apt:
+        name: isc-dhcp-server
+        state: present
+
+    - name: Configure DHCP server
+      template:
+        src: templates/dhcpd.conf.j2
+        dest: /etc/dhcp/dhcpd.conf
+
+    - name: Specify network interface for DHCP
+      lineinfile:
+        path: /etc/default/isc-dhcp-server
+        regexp: '^INTERFACESv4='
+        line: 'INTERFACESv4="ens18"'
+
+    - name: Restart DHCP service
+      systemd:
+        name: isc-dhcp-server
+        state: restarted
+        enabled: yes
